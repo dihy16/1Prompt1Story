@@ -392,11 +392,8 @@ def prompt2tokens(tokenizer, prompt):
         return_tensors="pt",
     )
     text_input_ids = text_inputs.input_ids
-    tokens = []
-    for text_input_id in text_input_ids[0]:
-        token = tokenizer.decoder[text_input_id.item()]
-        tokens.append(token)
-    return tokens
+    token_ids = text_input_ids[0].tolist()
+    return tokenizer.convert_ids_to_tokens(token_ids)
 
 
 def punish_wight(tensor, latent_size, alpha=1.0, beta=1.2, calc_similarity=False):

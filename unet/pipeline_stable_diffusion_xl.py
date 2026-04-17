@@ -1339,6 +1339,9 @@ class StableDiffusionXLPipeline(
                 latents = latents * latents_std / self.vae.config.scaling_factor + latents_mean
             else:
                 latents = latents / self.vae.config.scaling_factor
+            # when VAE is not upcasted, cast latent to original dtype
+            if not needs_upcasting:
+                latents = latents.to(self.vae.dtype)
 
             image = self.vae.decode(latents, return_dict=False)[0]
 

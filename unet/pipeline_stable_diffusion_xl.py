@@ -1318,12 +1318,14 @@ class StableDiffusionXLPipeline(
                 #     xm.mark_step()
 
         if not output_type == "latent":
-            # make sure the VAE is in float32 mode, as it overflows in float16
-            needs_upcasting = self.vae.dtype == torch.float16 and self.vae.config.force_upcast
+            vae_original_dtype = self.vae.dtype
+            needs_upcasting = vae_original_dtype == torch.float16 and getattr(self.vae.config, "force_upcast", False)
 
             if needs_upcasting:
                 self.upcast_vae()
-                latents = latents.to(next(iter(self.vae.post_quant_conv.parameters())).dtype)
+                vae_decode_dtype = next(iter(self.vae.post_quant_conv.parameters())).dtype
+            else:
+                vae_decode_dtype = vae_original_dtype
 
             # unscale/denormalize the latents
             # denormalize with the mean and std if available and not None
@@ -1339,17 +1341,13 @@ class StableDiffusionXLPipeline(
                 latents = latents * latents_std / self.vae.config.scaling_factor + latents_mean
             else:
                 latents = latents / self.vae.config.scaling_factor
-            # Cast to the decoder's real input dtype instead of self.vae.dtype,
-            # because custom/mixed VAE modules can report a global dtype that
-            # doesn't match the decode path.
-            decode_dtype = self.vae.decoder.conv_in.weight.dtype
-            latents = latents.to(decode_dtype)
+
+            latents = latents.to(vae_decode_dtype)
 
             image = self.vae.decode(latents, return_dict=False)[0]
 
-            # cast back to fp16 if needed
             if needs_upcasting:
-                self.vae.to(dtype=torch.float16)
+                self.vae.to(dtype=vae_original_dtype)
         else:
             image = latents
 

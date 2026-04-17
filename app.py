@@ -221,4 +221,4 @@ def gradio_interface():
 
 if __name__ == "__main__":
     demo = gradio_interface()
-    demo.launch()
+    demo.launch(share=True)

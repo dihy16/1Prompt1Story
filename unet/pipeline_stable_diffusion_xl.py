@@ -1319,13 +1319,19 @@ class StableDiffusionXLPipeline(
 
         if not output_type == "latent":
             vae_original_dtype = self.vae.dtype
+            decoder_original_dtype = self.vae.decoder.conv_in.weight.dtype
+            post_quant_original_dtype = self.vae.post_quant_conv.weight.dtype
             needs_upcasting = vae_original_dtype == torch.float16 and getattr(self.vae.config, "force_upcast", False)
 
             if needs_upcasting:
-                self.upcast_vae()
-                vae_decode_dtype = next(iter(self.vae.post_quant_conv.parameters())).dtype
+                # Run the entire decode path in float32. The partial-upcast
+                # optimization can leave decoder blocks on mixed dtypes for some
+                # model/runtime combinations, which breaks GroupNorm.
+                self.vae.post_quant_conv.to(dtype=torch.float32)
+                self.vae.decoder.to(dtype=torch.float32)
+                vae_decode_dtype = torch.float32
             else:
-                vae_decode_dtype = vae_original_dtype
+                vae_decode_dtype = self.vae.decoder.conv_in.weight.dtype
 
             # unscale/denormalize the latents
             # denormalize with the mean and std if available and not None
@@ -1344,10 +1350,22 @@ class StableDiffusionXLPipeline(
 
             latents = latents.to(vae_decode_dtype)
 
-            image = self.vae.decode(latents, return_dict=False)[0]
-
-            if needs_upcasting:
-                self.vae.to(dtype=vae_original_dtype)
+            try:
+                image = self.vae.decode(latents, return_dict=False)[0]
+            except RuntimeError as error:
+                raise RuntimeError(
+                    "VAE decode dtype mismatch: "
+                    f"latents={latents.dtype}, "
+                    f"vae={self.vae.dtype}, "
+                    f"post_quant_conv={self.vae.post_quant_conv.weight.dtype}, "
+                    f"decoder_conv_in={self.vae.decoder.conv_in.weight.dtype}, "
+                    f"decoder_mid_block={next(iter(self.vae.decoder.mid_block.parameters())).dtype}, "
+                    f"decoder_up_block0={next(iter(self.vae.decoder.up_blocks[0].parameters())).dtype}"
+                ) from error
+            finally:
+                if needs_upcasting:
+                    self.vae.post_quant_conv.to(dtype=post_quant_original_dtype)
+                    self.vae.decoder.to(dtype=decoder_original_dtype)
         else:
             image = latents
 

@@ -204,7 +204,11 @@ def load_pipe_from_path(model_path, device, torch_dtype, variant):
     if model_path.split('/')[-1] == 'Juggernaut-X-v10' or model_path.split('/')[-1] == 'Juggernaut-XI-v11':
         variant = None
 
-    vae = AutoencoderKL.from_pretrained(model_path, subfolder="vae", torch_dtype=torch_dtype, variant=variant,)
+    # Keep the VAE in fp32 for fp16 pipelines. SDXL-family VAEs often require
+    # float32 decode for numerical stability, and loading it that way avoids
+    # mixed-dtype decode failures later.
+    vae_dtype = torch.float32 if torch_dtype == torch.float16 else torch_dtype
+    vae = AutoencoderKL.from_pretrained(model_path, subfolder="vae", torch_dtype=vae_dtype, variant=variant,)
     tokenizer = CLIPTokenizer.from_pretrained(model_path, subfolder="tokenizer", torch_dtype=torch_dtype, variant=variant,)
     tokenizer_2 = CLIPTokenizer.from_pretrained(model_path, subfolder="tokenizer_2", torch_dtype=torch_dtype, variant=variant,)
     text_encoder = CLIPTextModel.from_pretrained(model_path, subfolder="text_encoder", torch_dtype=torch_dtype, variant=variant,)

@@ -1,0 +1,52 @@
+{
+  "combinations": [
+    {
+      "id_prompt": "A cinematic, hyper-realistic story of a young explorer discovering a hidden world.",
+      "frame_prompt_list": [
+        "waking up in a small wooden cabin at dawn",
+        "looking out the window at a misty forest",
+        "packing a worn leather backpack",
+        "stepping onto a quiet forest trail",
+        "sunlight filtering through tall trees",
+        "discovering strange glowing footprints on the ground",
+        "following the footprints deeper into the woods",
+        "arriving at an ancient stone archway covered in vines",
+        "hesitating before stepping through the arch",
+        "entering a hidden world filled with floating lights",
+        "walking through a field of bioluminescent plants",
+        "encountering a small, curious glowing creature",
+        "reaching out to touch the creature",
+        "the creature guiding the explorer forward",
+        "crossing a narrow bridge over a glowing river",
+        "looking down at fish made of light swimming below",
+        "arriving at a towering crystal structure",
+        "entering the crystal structure's grand hall",
+        "walls reflecting countless shimmering colors",
+        "seeing ancient symbols carved into the floor",
+        "touching the symbols and activating them",
+        "a vision appearing of an ancient civilization",
+        "watching the rise of the hidden world",
+        "seeing its sudden mysterious collapse",
+        "the vision fading away slowly",
+        "realizing the responsibility to protect this world",
+        "the glowing creature reacting with urgency",
+        "the ground beginning to tremble",
+        "cracks forming in the crystal walls",
+        "running out of the structure as it collapses",
+        "escaping across the bridge as it breaks apart",
+        "reaching the glowing field again in chaos",
+        "the hidden world starting to fade",
+        "rushing back toward the stone archway",
+        "jumping through just as the world collapses",
+        "falling onto the forest ground back in reality",
+        "the forest now silent and normal again",
+        "checking the backpack and finding a glowing artifact",
+        "holding the artifact as it pulses with light",
+        "walking back toward the cabin at sunset",
+        "turning back for one last look at the forest",
+        "a faint glow appearing deep within the trees",
+        "smiling, knowing the hidden world still exists"
+      ]
+    }
+  ]
+}
